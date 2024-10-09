@@ -1,0 +1,35 @@
+#Creador: Judith Cabrera 
+# Analisis datos PCR 
+
+#install.packages("pacman")
+
+library("pacman") #para activar p_load
+
+p_load("dplyr", #para facilitar manejo de datos 
+       "ggplot2", #para graficar 
+       "readr") #parallamar base de datos 
+
+datos_PCR <- read.csv(file="https://raw.githubusercontent.com/ManuelLaraMVZ/Transcript-mica/main/Genes.csv")
+head(datos_PCR)
+
+Promedios <- datos_PCR %>% 
+  mutate(Prom_Cx=(C1+C2+C3)/3) %>% 
+  mutate(Prom_Tx=(T1+T2+T3)/3) %>% 
+  select(1,8,9)
+
+
+Promedios
+
+Gen_endogeno <- Promedios %>% 
+  filter(Gen=="B-actina")#Filtramos de la columan Gen la celda que dice B-actina
+Gen_endogeno
+
+Delta_CT <- Promedios %>% 
+  mutate(DCT_Cx=Promedios$Prom_Cx-Gen_endogeno$Prom_Cx,
+         DCT_Tx=Promedios$Prom_Tx-Gen_endogeno$Prom_Tx) %>% 
+  mutate(DosDCT_Cx=2^(-DCT_Cx),
+         DosDCT_Tx=2^(-DCT_Tx)) %>% 
+  mutate(DosDDCT=DosDCT_Tx/DosDCT_Cx)
+Delta_CT
+
+write.csv(Delta_CT, file="Ejercicio_PCR.csv")
